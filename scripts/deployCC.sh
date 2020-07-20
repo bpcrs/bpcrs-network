@@ -1,4 +1,3 @@
-
 CHANNEL_NAME="$1"
 CC_SRC_LANGUAGE="$2"
 VERSION="$3"
@@ -13,43 +12,20 @@ VERBOSE="$6"
 : ${VERBOSE:="false"}
 CC_SRC_LANGUAGE=`echo "$CC_SRC_LANGUAGE" | tr [:upper:] [:lower:]`
 
-FABRIC_CFG_PATH=$PWD/../config/
+CHAINCODE_NAME="agreements"
 
-if [ "$CC_SRC_LANGUAGE" = "go" -o "$CC_SRC_LANGUAGE" = "golang" ] ; then
-	CC_RUNTIME_LANGUAGE=golang
-	CC_SRC_PATH="../chaincode/fabcar/go/"
+FABRIC_CFG_PATH=$PWD/./config/
 
-	echo Vendoring Go dependencies ...
-	pushd ../chaincode/fabcar/go
-	GO111MODULE=on go mod vendor
-	popd
-	echo Finished vendoring Go dependencies
+ if [ "$CC_SRC_LANGUAGE" = "typescript" ]; then
+	CC_RUNTIME_LANGUAGE=node
+	CC_SRC_PATH="./chaincode/chaincode-ts/"
 
-elif [ "$CC_SRC_LANGUAGE" = "javascript" ]; then
-	CC_RUNTIME_LANGUAGE=node # chaincode runtime language is node.js
-	CC_SRC_PATH="../chaincode/fabcar/javascript/"
-
-elif [ "$CC_SRC_LANGUAGE" = "java" ]; then
-	CC_RUNTIME_LANGUAGE=java
-	CC_SRC_PATH="../chaincode/fabcar/java/build/install/fabcar"
-
-	echo Compiling Java code ...
-	pushd ../chaincode/fabcar/java
-	./gradlew installDist
-	popd
-	echo Finished compiling Java code
-
-elif [ "$CC_SRC_LANGUAGE" = "typescript" ]; then
-	CC_RUNTIME_LANGUAGE=node # chaincode runtime language is node.js
-	CC_SRC_PATH="../chaincode/fabcar/typescript/"
-
-	echo Compiling TypeScript code into JavaScript ...
-	pushd ../chaincode/fabcar/typescript
+		echo Compiling TypeScript code into JavaScript ...
+	pushd ./chaincode/chaincode-ts
 	npm install
 	npm run build
 	popd
 	echo Finished compiling TypeScript code into JavaScript
-
 else
 	echo The chaincode language ${CC_SRC_LANGUAGE} is not supported by this script
 	echo Supported chaincode languages are: go, java, javascript, and typescript
@@ -64,7 +40,7 @@ packageChaincode() {
   ORG=$1
   setGlobals $ORG
   set -x
-  peer lifecycle chaincode package fabcar.tar.gz --path ${CC_SRC_PATH} --lang ${CC_RUNTIME_LANGUAGE} --label fabcar_${VERSION} >&log.txt
+  peer lifecycle chaincode package ${CHAINCODE_NAME}.tar.gz --path ${CC_SRC_PATH} --lang ${CC_RUNTIME_LANGUAGE} --label ${CHAINCODE_NAME}_${VERSION} >&log.txt
   res=$?
   set +x
   cat log.txt
@@ -78,7 +54,7 @@ installChaincode() {
   ORG=$1
   setGlobals $ORG
   set -x
-  peer lifecycle chaincode install fabcar.tar.gz >&log.txt
+  peer lifecycle chaincode install ${CHAINCODE_NAME}.tar.gz >&log.txt
   res=$?
   set +x
   cat log.txt
@@ -96,7 +72,7 @@ queryInstalled() {
   res=$?
   set +x
   cat log.txt
-	PACKAGE_ID=$(sed -n "/fabcar_${VERSION}/{s/^Package ID: //; s/, Label:.*$//; p;}" log.txt)
+	PACKAGE_ID=$(sed -n "/${CHAINCODE_NAME}_${VERSION}/{s/^Package ID: //; s/, Label:.*$//; p;}" log.txt)
   verifyResult $res "Query installed on peer0.org${ORG} has failed"
   echo PackageID is ${PACKAGE_ID}
   echo "===================== Query installed successful on peer0.org${ORG} on channel ===================== "
@@ -108,7 +84,7 @@ approveForMyOrg() {
   ORG=$1
   setGlobals $ORG
   set -x
-  peer lifecycle chaincode approveformyorg -o localhost:7050 --ordererTLSHostnameOverride orderer.example.com --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA --channelID $CHANNEL_NAME --name fabcar --version ${VERSION} --init-required --package-id ${PACKAGE_ID} --sequence ${VERSION} >&log.txt
+  peer lifecycle chaincode approveformyorg -o localhost:7050 --ordererTLSHostnameOverride orderer.example.com --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA --channelID $CHANNEL_NAME --name ${CHAINCODE_NAME} --version ${VERSION} --init-required --package-id ${PACKAGE_ID} --sequence ${VERSION} >&log.txt
   set +x
   cat log.txt
   verifyResult $res "Chaincode definition approved on peer0.org${ORG} on channel '$CHANNEL_NAME' failed"
@@ -130,7 +106,7 @@ checkCommitReadiness() {
     sleep $DELAY
     echo "Attempting to check the commit readiness of the chaincode definition on peer0.org${ORG} secs"
     set -x
-    peer lifecycle chaincode checkcommitreadiness --channelID $CHANNEL_NAME --name fabcar --version ${VERSION} --sequence ${VERSION} --output json --init-required >&log.txt
+    peer lifecycle chaincode checkcommitreadiness --channelID $CHANNEL_NAME --name ${CHAINCODE_NAME} --version ${VERSION} --sequence ${VERSION} --output json --init-required >&log.txt
     res=$?
     set +x
     let rc=0
@@ -160,7 +136,7 @@ commitChaincodeDefinition() {
   # peer (if join was successful), let's supply it directly as we know
   # it using the "-o" option
   set -x
-  peer lifecycle chaincode commit -o localhost:7050 --ordererTLSHostnameOverride orderer.example.com --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA --channelID $CHANNEL_NAME --name fabcar $PEER_CONN_PARMS --version ${VERSION} --sequence ${VERSION} --init-required >&log.txt
+  peer lifecycle chaincode commit -o localhost:7050 --ordererTLSHostnameOverride orderer.example.com --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA --channelID $CHANNEL_NAME --name ${CHAINCODE_NAME} $PEER_CONN_PARMS --version ${VERSION} --sequence ${VERSION} --init-required >&log.txt
   res=$?
   set +x
   cat log.txt
@@ -183,7 +159,7 @@ queryCommitted() {
     sleep $DELAY
     echo "Attempting to Query committed status on peer0.org${ORG}, Retry after $DELAY seconds."
     set -x
-    peer lifecycle chaincode querycommitted --channelID $CHANNEL_NAME --name fabcar >&log.txt
+    peer lifecycle chaincode querycommitted --channelID $CHANNEL_NAME --name ${CHAINCODE_NAME} >&log.txt
     res=$?
     set +x
 		test $res -eq 0 && VALUE=$(cat log.txt | grep -o '^Version: [0-9], Sequence: [0-9], Endorsement Plugin: escc, Validation Plugin: vscc')
@@ -211,7 +187,7 @@ chaincodeInvokeInit() {
   # peer (if join was successful), let's supply it directly as we know
   # it using the "-o" option
   set -x
-  peer chaincode invoke -o localhost:7050 --ordererTLSHostnameOverride orderer.example.com --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA -C $CHANNEL_NAME -n fabcar $PEER_CONN_PARMS --isInit -c '{"function":"initLedger","Args":[]}' >&log.txt
+  peer chaincode invoke -o localhost:7050 --ordererTLSHostnameOverride orderer.example.com --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA -C $CHANNEL_NAME -n ${CHAINCODE_NAME} $PEER_CONN_PARMS --isInit -c '{"function":"initLedger","Args":[]}' >&log.txt
   res=$?
   set +x
   cat log.txt
@@ -232,7 +208,7 @@ chaincodeQuery() {
     sleep $DELAY
     echo "Attempting to Query peer0.org${ORG} ...$(($(date +%s) - starttime)) secs"
     set -x
-    peer chaincode query -C $CHANNEL_NAME -n fabcar -c '{"Args":["queryAllCars"]}' >&log.txt
+    peer chaincode query -C $CHANNEL_NAME -n ${CHAINCODE_NAME} -c '{"Args":["queryAllCars"]}' >&log.txt
     res=$?
     set +x
 		let rc=$res
@@ -259,26 +235,34 @@ installChaincode 1
 echo "Install chaincode on peer0.org2..."
 installChaincode 2
 
+echo "Query installed.."
 ## query whether the chaincode is installed
 queryInstalled 1
 
+echo "Approve for org1.."
 ## approve the definition for org1
 approveForMyOrg 1
 
 ## check whether the chaincode definition is ready to be committed
 ## expect org1 to have approved and org2 not to
+echo "Commit readiness1.."
 checkCommitReadiness 1 "\"Org1MSP\": true" "\"Org2MSP\": false"
+echo "Commit readiness2.."
 checkCommitReadiness 2 "\"Org1MSP\": true" "\"Org2MSP\": false"
 
+echo "Approve for org2.."
 ## now approve also for org2
 approveForMyOrg 2
 
 ## check whether the chaincode definition is ready to be committed
 ## expect them both to have approved
+echo "Check commit read1.."
 checkCommitReadiness 1 "\"Org1MSP\": true" "\"Org2MSP\": true"
+echo "Check commit read2.."
 checkCommitReadiness 2 "\"Org1MSP\": true" "\"Org2MSP\": true"
 
 ## now that we know for sure both orgs have approved, commit the definition
+echo "Commit chaincode definition.."
 commitChaincodeDefinition 1 2
 
 ## query on both orgs to see that the definition committed successfully

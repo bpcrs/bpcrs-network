@@ -1,2 +1,8 @@
 /bin
 /config
+
+agreements.tar.gz
+log.txt
+/organizations
+/channel-artifacts
+system-genesis-block
