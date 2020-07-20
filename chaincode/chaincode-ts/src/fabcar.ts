@@ -137,4 +137,10 @@ export class FabCar extends Contract {
         console.info('============= END : changeCarOwner ===========');
     }
 
+    public async submitContract(ctx: Context, carId: number, renterId: number, ownerId: number){
+        console.info('============= START : submitContract ===========');
+        
+        console.info('============= END : submitContract ===========');
+    }
+
 }

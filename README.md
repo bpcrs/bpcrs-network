@@ -10,7 +10,7 @@ More info about how to create it at:
 `git clone https://github.com/ialberquilla/hlf1.4-couchdb`
 
 2. Download bin and config files
-`curl -sSL https://bit.ly/2ysbOFE | bash -s -- -d -s`
+`curl -sSL https://bit.ly/2ysbOFE | bash -s -- 2.0.1 1.4.7`
 
 
 # Start the network
