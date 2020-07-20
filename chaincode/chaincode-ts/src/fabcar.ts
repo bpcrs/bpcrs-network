@@ -4,6 +4,11 @@
 
 import { Context, Contract } from 'fabric-contract-api';
 import { Car } from './car';
+import {Agreement} from "./agreement";
+
+const DOC_TYPE = {
+    AGREEMENT : "AGREEMENT"
+}
 
 export class FabCar extends Contract {
 
@@ -139,7 +144,12 @@ export class FabCar extends Contract {
 
     public async submitContract(ctx: Context, carId: number, renterId: number, ownerId: number){
         console.info('============= START : submitContract ===========');
-        
+
+        const agreement: Agreement = {
+            carId, ownerId, renterId,
+            docType : DOC_TYPE.AGREEMENT
+        }
+        await ctx.stub.putState(DOC_TYPE.AGREEMENT+"", Buffer.from(JSON.stringify(agreement)));
         console.info('============= END : submitContract ===========');
     }
 
