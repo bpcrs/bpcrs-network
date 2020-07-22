@@ -200,7 +200,7 @@ Application: &ApplicationDefaults
         # ACL policy for cscc's "SimulateConfigTreeUpdate" function
         cscc/SimulateConfigTreeUpdate: /Channel/Application/Readers
 
-        #---Miscellaneous peer function to policy mapping for access control---#
+        #---Miscellanesous peer function to policy mapping for access control---#
 
         # ACL policy for invoking chaincodes on peer
         peer/Propose: /Channel/Application/Writers
@@ -257,7 +257,7 @@ Application: &ApplicationDefaults
 Orderer: &OrdererDefaults
 
     # Orderer Type: The orderer implementation to start.
-    # Available types are "solo", "kafka" and "etcdraft".
+    # Available types are "solo" and "kafka".
     OrdererType: solo
 
     # Addresses used to be the list of orderer addresses that clients and peers
@@ -485,8 +485,8 @@ Profiles:
     SampleInsecureKafka:
         <<: *ChannelDefaults
         Orderer:
-            <<: *OrdererDefaults
             OrdererType: kafka
+            <<: *OrdererDefaults
         Consortiums:
             SampleConsortium:
                 Organizations:
