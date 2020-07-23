@@ -176,7 +176,7 @@ function networkUp() {
 
   if [ "${NO_CHAINCODE}" != "true" ]; then
     echo Compiling TypeScript code into JavaScript ...
-	  pushd ./chaincode/chaincode-ts
+	  pushd ./chaincode-ts
 	  npm install
 	  npm run build
   	popd
