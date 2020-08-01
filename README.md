@@ -5,3 +5,4 @@ The directions for using this are documented in the Hyperledger Fabric
 
 *NOTE:* After navigating to the documentation, choose the documentation version that matches your version of Fabric
 
+Run network: ./byfn.sh up -n -a
