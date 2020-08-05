@@ -8,7 +8,7 @@ import { Car } from './car';
 
 const DOC_TYPE = {
     AGREEMENT : 'AGREEMENT',
-}
+};
 
 export class FabCar extends Contract {
 
@@ -142,15 +142,36 @@ export class FabCar extends Contract {
         console.info('============= END : changeCarOwner ===========');
     }
 
-    public async submitContract(ctx: Context, carId: number, renterId: number, ownerId: number){
+    public async submitContract(ctx: Context, key: string, carId: number, renterId: number, ownerId: number,
+                                fromDate: Date, toDate: Date, location: string, destination: string,
+                                carPrice: number, totalPrice: number, criteria: string) {
         console.info('============= START : submitContract ===========');
-
+        const criteriaArr = JSON.parse(criteria);
         const agreement: Agreement = {
             carId, ownerId, renterId,
-            docType : DOC_TYPE.AGREEMENT
-        }
-        await ctx.stub.putState(DOC_TYPE.AGREEMENT+"", Buffer.from(JSON.stringify(agreement)));
+            fromDate,
+            toDate,
+            totalPrice,
+            carPrice,
+            location,
+            destination,
+            docType : DOC_TYPE.AGREEMENT,
+            criteria: criteriaArr,
+        };
+        await ctx.stub.putState(`${DOC_TYPE.AGREEMENT}_${key}`, Buffer.from(JSON.stringify(agreement)));
         console.info('============= END : submitContract ===========');
+    }
+
+    public async queryContract(ctx: Context, key: string) {
+        console.info('============= START : queryContract ===========');
+        const agreementAsBytes = await ctx.stub.getState(`${DOC_TYPE.AGREEMENT}_${key}`); // get the car from chaincode state
+
+        if (!agreementAsBytes || agreementAsBytes.length === 0) {
+            throw new Error(`${DOC_TYPE.AGREEMENT}_${key} does not exist`);
+        }
+        console.log(agreementAsBytes.toString());
+        console.info('============= END : queryContract ===========');
+        return agreementAsBytes.toString();
     }
 
 }

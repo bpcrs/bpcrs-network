@@ -48,8 +48,20 @@ PeerOrgs:
     #                 which obtains its values from the Spec.Hostname and
     #                 Org.Domain, respectively.
     # ---------------------------------------------------------------------------
+    Specs:
+      - Hostname: peer0
+        CommonName: peer0.example.com # overrides Hostname-based FQDN set above
+        SANS:
+          - "localhost"
+      - Hostname: peer1
+        CommonName: peer1.example.com
+        SANS:
+          - "localhost"
     # Specs:
-    #   - Hostname: foo # implicitly "foo.org1.example.com"
+    #   - Hostname: localhost # implicitly "foo.org1.example.com"
+    #     SANS:
+    #       - "localhost"
+    #       - 127.0.0.1
     #     CommonName: foo27.org5.example.com # overrides Hostname-based FQDN set above
     #   - Hostname: bar
     #   - Hostname: baz
@@ -69,6 +81,8 @@ PeerOrgs:
       Count: 2
       # Start: 5
       # Hostname: {{.Prefix}}{{.Index}} # default
+      SANS:
+        - "localhost"
     # ---------------------------------------------------------------------------
     # "Users"
     # ---------------------------------------------------------------------------
@@ -82,7 +96,13 @@ PeerOrgs:
   - Name: Org2
     Domain: org2.example.com
     EnableNodeOUs: true
+    # Specs:
+    #   - Hostname: localhost
+    #     SANS:
+    #       - "localhost"
     Template:
       Count: 2
+      SANS:
+          - "localhost"
     Users:
       Count: 1

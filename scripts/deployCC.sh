@@ -1,6 +1,5 @@
 #!/bin/bash
 export PATH=${PWD}/bin:${PWD}:$PATH
-# export FABRIC_CFG_PATH=${PWD}/config
 VERSION="$1"
 . scripts/utils.sh
 ## at first we package the chaincode

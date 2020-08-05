@@ -47,5 +47,3 @@ CAPEM=crypto-config/peerOrganizations/org2.example.com/ca/ca.org2.example.com-ce
 
 echo "$(json_ccp $ORG $P0PORT $P1PORT $CAPORT $PEERPEM $CAPEM)" > crypto-config/peerOrganizations/org2.example.com/connection-org2.json
 echo "$(yaml_ccp $ORG $P0PORT $P1PORT $CAPORT $PEERPEM $CAPEM)" > crypto-config/peerOrganizations/org2.example.com/connection-org2.yaml
-
-cp -R crypto-config/ ../dapp-java/crypto-config/
