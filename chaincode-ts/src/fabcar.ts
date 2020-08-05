@@ -144,9 +144,8 @@ export class FabCar extends Contract {
 
     public async submitContract(ctx: Context, key: string, carId: number, renterId: number, ownerId: number,
                                 fromDate: Date, toDate: Date, location: string, destination: string,
-                                carPrice: number, totalPrice: number, criteria: string) {
+                                carPrice: number, totalPrice: number, criteria: string): Promise<string>{
         console.info('============= START : submitContract ===========');
-        const criteriaArr = JSON.parse(criteria);
         const agreement: Agreement = {
             carId, ownerId, renterId,
             fromDate,
@@ -156,10 +155,11 @@ export class FabCar extends Contract {
             location,
             destination,
             docType : DOC_TYPE.AGREEMENT,
-            criteria: criteriaArr,
+            criteria,
         };
         await ctx.stub.putState(`${DOC_TYPE.AGREEMENT}_${key}`, Buffer.from(JSON.stringify(agreement)));
         console.info('============= END : submitContract ===========');
+        return key;
     }
 
     public async queryContract(ctx: Context, key: string) {

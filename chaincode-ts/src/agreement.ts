@@ -11,5 +11,5 @@ export class Agreement {
     public totalPrice: number;
     public location: string;
     public destination: string;
-    public criteria: Criteria[];
+    public criteria: string;
 }
