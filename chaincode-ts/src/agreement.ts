@@ -12,5 +12,4 @@ export class Agreement {
     public destination: string;
     public criteria: string;
     public signature?: string;
-    public timeSign?: Date;
 }

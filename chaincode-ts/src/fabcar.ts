@@ -158,7 +158,8 @@ export class FabCar extends Contract {
             location,
             destination,
             docType : DOC_TYPE.AGREEMENT,
-            criteria
+            criteria : JSON.parse(criteria),
+            signature : '',
         };
         await ctx.stub.putState(`${this.getCompositeKeyAgreement(key,COPY_TYPE.OWNER)}`, Buffer.from(JSON.stringify(agreement)));
         await ctx.stub.putState(`${this.getCompositeKeyAgreement(key,COPY_TYPE.RENTER)}`, Buffer.from(JSON.stringify(agreement)));
@@ -187,12 +188,13 @@ export class FabCar extends Contract {
         if (!agreementAsBytes || agreementAsBytes.length === 0) {
             throw new Error(`${this.getCompositeKeyAgreement(key,copyType)} does not exist`);
         }
+        
         const agreement: Agreement = JSON.parse(agreementAsBytes.toString());
+        if (agreement.signature !== '') {
+            throw new Error("This contract aleardy signed.")
+        } 
         agreement.signature = signature;
-        agreement.timeSign = new Date();
-
         await ctx.stub.putState(this.getCompositeKeyAgreement(key,copyType), Buffer.from(JSON.stringify(agreement)));
         console.info('============= END : sigingContract ===========');
-        return agreementAsBytes.toString();
     }
 }
